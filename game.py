@@ -1,26 +1,21 @@
 import numpy as np
+import tensorflow as tf
 from keras.models import load_model
 from flask import Flask, render_template, session, request
 import chess
 from ai.state import State
 import traceback
 
-graph = None
+graph = tf.get_default_graph()
+model = load_model("ai/datasets/model.h5")
 
 class ChessAI(object):
-    def __init__(self):
-        print('loading model...')
-        self.model = load_model("ai/datasets/model.h5")
-        import tensorflow as tf
-        global graph
-        graph = tf.get_default_graph()
-        print('model loaded.')
-
     def __call__(self, state, white=True):
         global graph
+        global model
         with graph.as_default():
             board = state.serialize_for_ai()
-            output = self.model.predict(np.array([board, ]))
+            output = model.predict(np.array([board, ]))
 
             if white:
                 return output[0][0]
