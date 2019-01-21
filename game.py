@@ -50,9 +50,10 @@ def move():
             state.board.push(move)
 
             # now let the computer take it's turn
-            ai_move(state)
+            if not state.is_game_over():
+                ai_move(state)
 
-            session["fen"] = State().board.fen()
+            session["fen"] = state.board.fen()
             return app.response_class(
                 response=state.board.fen(),
                 status=200
@@ -88,13 +89,12 @@ def eval_options(state):
     ai = ChessAI()
     val, best_move = minimax(state, ai, playing_as_white=state.board.turn == chess.WHITE)
     print('best move:', val, best_move)
-    if best_move is None:
+    if best_move is None and not state.is_game_over():
         best_move = state.get_possible_moves()[0]
     return best_move
 
 def ai_move(state):
     move = eval_options(state)
-    print('Move', move)
     state.board.push(move)
 
 if __name__ == '__main__':
