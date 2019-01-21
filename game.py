@@ -50,7 +50,7 @@ def move():
             state.board.push(move)
 
             # now let the computer take it's turn
-            if not state.is_game_over():
+            if not state.board.is_game_over():
                 ai_move(state)
 
             session["fen"] = state.board.fen()
@@ -68,30 +68,43 @@ def move():
 MAXVAL = 100000
 
 def minimax(state, ai, depth=1, maximizing_player=True, playing_as_white = True):
-    if depth >= 2 or state.board.is_game_over():
-        return ai(state), None
+    if depth >= 3 or state.board.is_game_over():
+        return ai(state)
 
     value = -MAXVAL
-    best_move = None
+    if depth == 1:
+        moves = []
 
     for move in state.get_possible_moves():
         state.board.push(move)
-        cval, bm = minimax(state, ai, depth+1, not maximizing_player, playing_as_white=playing_as_white)
+        cval = minimax(state, ai, depth+1, not maximizing_player, playing_as_white=playing_as_white)
         state.board.pop()
 
-        if cval > value:
-            best_move = move
-            value = cval
+        if (depth == 1):
+            moves.append((cval, move))
 
-    return value, best_move
+        if (maximizing_player):
+            value = max(value, cval)
+        else:
+            value = min(value, cval)
+
+    if depth == 1:
+        return value, moves
+    else:
+        return value
 
 def eval_options(state):
     ai = ChessAI()
-    val, best_move = minimax(state, ai, playing_as_white=state.board.turn == chess.WHITE)
-    print('best move:', val, best_move)
-    if best_move is None and not state.is_game_over():
-        best_move = state.get_possible_moves()[0]
-    return best_move
+    val, moves = minimax(state, ai, playing_as_white=state.board.turn == chess.WHITE)
+    best_moves = sorted(moves, key=lambda x: x[0], reverse=True)
+    if len(best_moves) == 0:
+        return None
+
+    print("top 3 options:")
+    for i, m in enumerate(best_moves[0:3]):
+        print("  ", m)
+
+    return best_moves[0][1]
 
 def ai_move(state):
     move = eval_options(state)
