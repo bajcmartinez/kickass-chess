@@ -1,0 +1,60 @@
+<html>
+    <head>
+        <title>Kickass Chess - by Juan Cruz Martinez</title>
+        <script type="text/javascript" src="static/chessboardjs/js/chessboard-0.3.0.min.js"></script>
+        <script type="text/javascript" src="static/jquery-3.3.1.min.js"></script>
+
+        <link rel="stylesheet" href="static/chessboardjs/css/chessboard-0.3.0.min.css" />
+        <style>
+            #board {
+                margin: 0 auto;
+                width: 400px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="board">
+        </div>
+
+        <script type="text/javascript">
+            let loading = false;
+
+            function onDragStart() {
+                return !loading;
+            }
+
+            function onDrop(source, target, piece) {
+                if(source === target) return;
+
+                console.group("piece moved");
+                console.log("source", source);
+                console.log("target", target);
+                console.log("piece", piece);
+                console.groupEnd();
+
+                let current = board.fen();
+                loading = true;
+
+                $.post('/api/move', {
+                    source,
+                    target,
+                    piece
+                }).done(function(response) {
+                    loading = false;
+                    board.position(response);
+                }).fail(function() {
+                    loading = false;
+                    board.position(current);
+                });
+            }
+
+            var board = ChessBoard('board', {
+                pieceTheme: 'static/chessboardjs/img/chesspieces/wikipedia/{piece}.png',
+                draggable: true,
+                onDrop: onDrop,
+                onDragStart: onDragStart
+            });
+            board.start();
+        </script>
+    </body>
+</html>

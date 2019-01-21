@@ -2,6 +2,7 @@ import chess
 import numpy as np
 
 class State:
+
     def __init__(self, board=None):
         if board is None:
             self.board = chess.Board()
