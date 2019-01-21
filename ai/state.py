@@ -8,6 +8,9 @@ class State:
         else:
             self.board = board
 
+    def get_possible_moves(self):
+        return list(self.board.legal_moves)
+
     def serialize_for_ai(self):
         # Make sure that the board is in a valid state, otherwise throw erorr
         assert self.board.is_valid()
